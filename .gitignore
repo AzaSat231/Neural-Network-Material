@@ -8,5 +8,7 @@ venv/
 # VS Code settings
 .vscode/
 
+data/
+
 # macOS junk
 .DS_Store
