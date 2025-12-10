@@ -1,4 +1,7 @@
 import numpy as np
+import random
+import sys
+
 
 def sigmoid(z):
         return 1.0/(1.0+np.exp(-z))
@@ -19,6 +22,8 @@ class Network(object):
         for b, w in zip(self.biases, self.weights):
             a = sigmoid(np.dot(w, a)+b)
         return a
+
+    
         
 
 
