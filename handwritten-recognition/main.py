@@ -9,7 +9,7 @@ import pickle
 def sigmoid(z):
     return 1.0/(1.0+np.exp(-z))
 
-def cost_function(net_value):
+def cost_function_avg(net_value):
     amount_net = len(net_value[1])
 
     total_cost = 0
@@ -41,7 +41,6 @@ def cost_function(net_value):
 
 # Representation of neural network, it initialization
 class Network(object):
-
     def __init__(self, sizes):
         self.num_layers = len(sizes)
         self.sizes = sizes
@@ -60,18 +59,53 @@ class Network(object):
             # print(f"Weight in loop: {w}")
             a = sigmoid(np.dot(w, a)+b)
             # print(f"a: {a}")
-        
         return a
+    
+    def SGD(self, data_set):
+        """Stochastic gradient descent learning"""
+        """First of all we divide our data into mini-batches"""
+        """Second of all"""
+
+        X = data_set[0]   # first np.array
+        y = data_set[1]   # second np.array
+
+        # generate a permutation of indices
+        perm = np.random.permutation(len(X))
+
+        print(perm)
+
+        # apply SAME permutation to both arrays
+        X_shuffled = X[perm]
+        y_shuffled = y[perm]
+
+        shuffled_data = (X_shuffled, y_shuffled)
+
+        batch_size = 100
+        mini_batches = []
+
+        for k in range(0, len(data_set), batch_size):
+            mini_batches.append(shuffled_data[k:k + batch_size])
+
+        # Output for number 1
+        # print(mini_batches[0][1][0])
+    
+    def update_mini_batch(self, train_set):
+        val = 1
 
 
 if __name__ == "__main__":
-    # Creation of network with 3 layers, first one will have 2 neurons
-    # second one will have 3 neurons and last one will have 1 neuron
+    # Creation of network with 4 layers, first one will have 784 neurons
+    # second one will have 15 neurons and third one will also have 15 neurons
+    # last one will have 10 neurons, it will represent digits from 0 to 9
     net = Network([784, 15, 15, 10])    
     with gzip.open("/Users/azizsattarov/Desktop/Federated Learning/neural-networks-and-deep-learning/data/mnist.pkl.gz", "rb") as f:
         train_set, valid_set, test_set = pickle.load(f, encoding="latin1")
 
-    val = cost_function(train_set)
+    val = cost_function_avg(train_set)
+
+    print(train_set[1])
+
+    net.SGD(train_set)
 
     print(f"Total cost: {val}")
 
