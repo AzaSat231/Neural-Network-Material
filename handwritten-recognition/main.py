@@ -5,7 +5,6 @@ import gzip
 import pickle
 
 
-
 def sigmoid(z):
     return 1.0/(1.0+np.exp(-z))
 
@@ -69,31 +68,42 @@ class Network(object):
         """First of all we divide our data into mini-batches"""
         """Second of all"""
 
-        X = data_set[0]   # first np.array
-        y = data_set[1]   # second np.array
+        num_epoch = 30
 
-        # generate a permutation of indices
-        perm = np.random.permutation(len(X))
+        for i in range(num_epoch):
+            X = data_set[0]   # first np.array
+            y = data_set[1]   # second np.array
 
-        # Apply same permutation to both arrays
-        X_shuffled = X[perm]
-        y_shuffled = y[perm]
+            # generate a permutation of indices
+            perm = np.random.permutation(len(X))
 
-        shuffled_data = (X_shuffled, y_shuffled)
+            # Apply same permutation to both arrays
+            X_shuffled = X[perm]
+            y_shuffled = y[perm]
 
-        mini_batches = []
+            shuffled_data = (X_shuffled, y_shuffled)
 
-        for k in range(0, len(X_shuffled), batch_size):
-            images = shuffled_data[0]
-            labels = shuffled_data[1]
-            data = (images[k:k+batch_size], labels[k:k+batch_size])
+            mini_batches = []
 
-            mini_batches.append(data)
-        
-        for mini_batch in mini_batches:
-            self.update_mini_batch(mini_batch)
-    
+            for k in range(0, len(X_shuffled), batch_size):
+                images = shuffled_data[0]
+                labels = shuffled_data[1]
+                data = (images[k:k+batch_size], labels[k:k+batch_size])
+
+                mini_batches.append(data)
+                    
+            for mini_batch in mini_batches:
+                self.update_mini_batch(mini_batch)
+            
+            val = cost_function_avg(shuffled_data)
+            print(f"Total cost in epoch {i+1}: {val}")
+
+
     def update_mini_batch(self, batch):
+        total_bias_gradient = [np.zeros(b.shape) for b in self.biases]
+        total_weight_gradient = [np.zeros(w.shape) for w in self.weights]
+        eta = 0.3
+
         for i in range(len(batch[1])):
             value = np.array(batch[0][i])
 
@@ -106,15 +116,38 @@ class Network(object):
             desired_output[batch[1][i]] = 1
 
             delta = self.backpropogation(net_output, desired_output)
+            
+            bias_gradient = delta
+
+            weight_gradient = []
+            for l in range(self.num_layers - 1):
+                weight_gradient.append(np.dot(delta[l], self.layer[l].T))
+            
+            for l in range(self.num_layers - 1):
+                total_bias_gradient[l] += bias_gradient[l]
+                total_weight_gradient[l] += weight_gradient[l]
+            
+        avg_bias_gradient = [b / len(batch[1]) for b in total_bias_gradient]
+        avg_weight_gradient = [w / len(batch[1]) for w in total_weight_gradient]
+
+        for l in range(len(self.weights)):
+            self.weights[l] -= eta * avg_weight_gradient[l]
+            self.biases[l]  -= eta * avg_bias_gradient[l]
+
+
 
     def backpropogation(self, net_output, desired_output):
         # Computed output layer
-        delta = (net_output - desired_output) * (net_output * (1-net_output))
+        delta = []
+        delta_val = (net_output - desired_output) * (net_output * (1-net_output))
+
+        delta.insert(0, delta_val)
 
         # Computed hidden layers
         i = self.num_layers-2
         while i != 0:
-            delta = np.dot(self.weights[i].reshape(self.weights[i].shape[::-1]), delta)*(self.layer[i]*(1-self.layer[i]))
+            delta_val = np.dot(self.weights[i].reshape(self.weights[i].shape[::-1]), delta_val)*(self.layer[i]*(1-self.layer[i]))
+            delta.insert(0, delta_val)
             i -= 1
         
         return delta
@@ -127,12 +160,30 @@ if __name__ == "__main__":
     with gzip.open("/Users/azizsattarov/Desktop/Federated Learning/neural-networks-and-deep-learning/data/mnist.pkl.gz", "rb") as f:
         train_set, valid_set, test_set = pickle.load(f, encoding="latin1")
 
-    # val = cost_function_avg(train_set)
-
-    # print(train_set[1])
-
     net.SGD(data_set=train_set, batch_size=100)
 
-    # print(f"Total cost: {val}")
+    amount_net = len(test_set[1])
+    correct = 0
+    for i in range(amount_net):
+        imageValue = np.array(test_set[0][i])
+
+        imageValue = imageValue.reshape(784, 1)    
+
+        net_output = net.feedforward(imageValue)
+
+        desired_output = test_set[1][i]
+
+        predicted_digit = np.argmax(net_output)
+
+        if predicted_digit == desired_output:
+            correct += 1
+    
+    print(f"Accuracy = {correct/amount_net}")
+
+
+        
+
+
+
 
     
