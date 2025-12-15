@@ -9,6 +9,9 @@ import pickle
 def sigmoid(z):
     return 1.0/(1.0+np.exp(-z))
 
+def cost_function():
+    val = 1
+
 # Representation of neural network, it initialization
 class Network(object):
 
@@ -47,8 +50,18 @@ if __name__ == "__main__":
 
     print(f"Value: {imageValue.shape}")
 
-    net.feedforward(imageValue)
+    net_output = net.feedforward(imageValue)
 
-    
+    print(f"Actual number: {train_set[1][0]}")
+
+    desired_output = np.zeros((10, 1), dtype=int)
+
+    desired_output[train_set[1][0]] = 1
+
+    print(f"Desired output: {desired_output}")
+
+    cost_result = pow((desired_output - net_output),2)
+
+    print(f"Cost of number {train_set[1][0]}: {cost_result.sum()}")
 
     
