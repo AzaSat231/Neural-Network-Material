@@ -61,7 +61,7 @@ class Network(object):
             # print(f"a: {a}")
         return a
     
-    def SGD(self, data_set):
+    def SGD(self, data_set, batch_size):
         """Stochastic gradient descent learning"""
         """First of all we divide our data into mini-batches"""
         """Second of all"""
@@ -72,22 +72,22 @@ class Network(object):
         # generate a permutation of indices
         perm = np.random.permutation(len(X))
 
-        print(perm)
-
-        # apply SAME permutation to both arrays
+        # Apply same permutation to both arrays
         X_shuffled = X[perm]
         y_shuffled = y[perm]
 
         shuffled_data = (X_shuffled, y_shuffled)
 
-        batch_size = 100
         mini_batches = []
 
-        for k in range(0, len(data_set), batch_size):
-            mini_batches.append(shuffled_data[k:k + batch_size])
+        for k in range(0, len(X_shuffled), batch_size):
+            images = shuffled_data[0]
+            labels = shuffled_data[1]
+            data = (images[k:k+batch_size], labels[k:k+batch_size])
 
-        # Output for number 1
-        # print(mini_batches[0][1][0])
+            mini_batches.append(data)
+
+        print(mini_batches[0][1])
     
     def update_mini_batch(self, train_set):
         val = 1
@@ -105,7 +105,7 @@ if __name__ == "__main__":
 
     print(train_set[1])
 
-    net.SGD(train_set)
+    net.SGD(data_set=train_set, batch_size=100)
 
     print(f"Total cost: {val}")
 
