@@ -63,12 +63,10 @@ class Network(object):
             # print(f"a: {a}")
         return a
     
-    def SGD(self, data_set, batch_size):
+    def SGD(self, data_set, batch_size, num_epoch, eta):
         """Stochastic gradient descent learning"""
         """First of all we divide our data into mini-batches"""
         """Second of all"""
-
-        num_epoch = 30
 
         for i in range(num_epoch):
             X = data_set[0]   # first np.array
@@ -93,16 +91,15 @@ class Network(object):
                 mini_batches.append(data)
                     
             for mini_batch in mini_batches:
-                self.update_mini_batch(mini_batch)
+                self.update_mini_batch(mini_batch, eta)
             
             val = cost_function_avg(shuffled_data)
             print(f"Total cost in epoch {i+1}: {val}")
 
 
-    def update_mini_batch(self, batch):
+    def update_mini_batch(self, batch, eta):
         total_bias_gradient = [np.zeros(b.shape) for b in self.biases]
         total_weight_gradient = [np.zeros(w.shape) for w in self.weights]
-        eta = 0.3
 
         for i in range(len(batch[1])):
             value = np.array(batch[0][i])
@@ -160,7 +157,7 @@ if __name__ == "__main__":
     with gzip.open("/Users/azizsattarov/Desktop/Federated Learning/neural-networks-and-deep-learning/data/mnist.pkl.gz", "rb") as f:
         train_set, valid_set, test_set = pickle.load(f, encoding="latin1")
 
-    net.SGD(data_set=train_set, batch_size=100)
+    net.SGD(data_set=train_set, batch_size=10, num_epoch=30, eta=3.0)
 
     amount_net = len(test_set[1])
     correct = 0
