@@ -1,4 +1,5 @@
 import torch
+import torchvision.models as models
 from torch import nn
 from torchvision import datasets, transforms
 from torch.utils.data import DataLoader
@@ -122,6 +123,12 @@ if __name__ == "__main__":
         train_loop(train_dataloader, model, loss_fn, optimizer)
         test_loop(test_dataloader, model, loss_fn)
     print("Done!")
+
+    # It will store all weights into dictionary,
+    # with torch.save it will stored in the file (named as model_weights.pth)
+    torch.save(model.state_dict(), 'model_weights.pth')
+    print("Model saved!")
+
 
 
 
